@@ -3,6 +3,7 @@
 namespace Blog\Repository;
 
 use Blog\Application;
+use Blog\Entity\Company;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Common\Persistence\ObjectManager;
 
@@ -145,29 +146,29 @@ class CompanyRepository extends EntityRepository
 		return $company;
 	}
 
-	public function createNewCompany(ObjectManager $manager)
-	{
-		$company = new Company();
-		
-		$company->setName($body->name);
-		$company->setCountry();
-		$company->setRegion();
-		$company->setCity();
-		$company->setStreet();
-		$company->setPostCode();
-		$company->setRegNo();
-		$company->setRegDate(new \DateTime());
-		$company->setTaxNo();
-		$company->setWebsite();
+	public function createNewCompany($body)
+	{		
+		try {
+			$app = new Application();
+			$company = new Company();
 
-		$manager->persist($company);
+			$company->setName($body->new_company->name);
+			$company->setCountry($body->new_company->country);
+			$company->setRegion($body->new_company->region);
+			$company->setCity($body->new_company->city);
+			$company->setStreet($body->new_company->street);
+			$company->setPostCode($body->new_company->postCode);
+			$company->setRegNo($body->new_company->regNo);
+			$company->setRegDate(new \DateTime());
+			$company->setTaxNo($body->new_company->taxNo);
+			$company->setWebsite($body->new_company->website);
 
-		if($manager->flush($company);){
-			
-		} else  {
-			throw new \Exception('did not save');
+			$app['entityManager']->persist($company);
+			$app['entityManager']->flush($company); 
+			return $company->getId();
+		} catch (\Exception $e) {
+			echo $e->getMessage();
+			throw new \Exception('The company entity was not created');
 		}
-
-
 	}
 }

@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
-class CompanyController 
+class CompanyController extends BaseController
 {
 	/**
 	 * [listAction description]
@@ -44,18 +44,23 @@ class CompanyController
 	public function newAction(Request $request)
 	{
 		$app = new Application();
-		$body = $request->getContent();
-		print_r($body);		
-		
-		// try {
-		// 	$app['repository.company']->createNewCompany($body);
-		// 	$company = $app['repository.company']->getLastInsert();
+		$content = $request->getContent();
+		parse_str($content, $body);
+		$body = json_decode(json_encode($body));
 
-		// 	return new JsonResponse($data, 201); 
-		// } catch(\Exception $e) {
-		// 	$e->getMessage()
-		// 	return new JsonResponse(500);
-		// }
+		try {
+			$companyId = $app['repository.company']->createNewCompany($body);
+			
+			$url = $this->generateUrl($companyId);
+
+			$response = new JsonResponse(201);
+			$response->headers->set('Location', $url);
+
+			return $response;
+		} catch(\Exception $e) {
+			echo $e->getMessage();
+			return new JsonResponse(500);
+		}
 	}
 
 	/**
